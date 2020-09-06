@@ -19,6 +19,10 @@ BLOCK_W = 20
 BLOCK_H = 20
 MARGIN = 1
 SNAKE_BLOCK = 2
+UP = 1
+DOWN = 2 
+LEFT = 3
+RIGHT = 4
 
 
 #Setting up the window
@@ -28,14 +32,21 @@ icon = pygame.image.load("snake.png")
 pygame.display.set_icon(icon)
 
 #Snake class
-class Snake:
-    def __init__(self,grid):
-        self.length = 1
-        self.x_coord = COLS // 2
-        self.y_coord = ROWS // 2
+class Snake():
+#This class contains the variables associated with a snake
+
+    length = 1
+
+    #start the snake in the middle of the grid
+    x_coord = COLS // 2
+    y_coord = ROWS // 2
+
+    #initialize the corresponding grid value
+    def __init__(self, grid):
         grid[ROWS // 2][COLS // 2] = SNAKE_BLOCK
         pygame.draw.rect(board, RED, (self.x_coord*BLOCK_W,self.y_coord*BLOCK_H,BLOCK_W,BLOCK_H))
 
+    direction = RIGHT
 
 #draw the grid lines
 def draw_board():
@@ -75,6 +86,9 @@ def main():
     #fill grid with white
     board.fill(WHITE)
 
+    #draw grid lines
+    draw_board()
+
     #empty grid
     grid_vals = []
 
@@ -84,18 +98,37 @@ def main():
     #clear grid values(set all to zero)
     clear_grid(grid_vals)
 
-    #for row in range(ROWS - 1):
-        #for col in range(COLS - 1):
-            #print(grid_vals[row][col])
-        #print('\n')
     green_square(grid_vals)
+
+    #create the snake character
     s = Snake(grid_vals)
+    
     run = True
     while run:
+        pygame.time.delay(60)
+
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 run = False
-        draw_board()
+        
+        #get all key values
+        keys = pygame.key.get_pressed()
+        
+        #determine direction that the snake should move
+        if keys[pygame.K_UP]:
+            s.direction = UP
+            s.y_coord -= 1                  #rows count top to bottom
+        if keys[pygame.K_DOWN]:
+            s.direction = DOWN
+            s.y_coord += 1
+        if keys[pygame.K_LEFT]:
+            s.direction = LEFT
+            s.x_coord -= 1
+        if keys[pygame.K_RIGHT]:
+            s.direction = RIGHT
+            s.x_coord += 1
+        
+        pygame.draw.rect(board, RED, (s.x_coord*BLOCK_W,s.y_coord*BLOCK_H,BLOCK_W,BLOCK_H))
         pygame.display.update()
 
 main()
