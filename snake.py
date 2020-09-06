@@ -35,11 +35,13 @@ pygame.display.set_icon(icon)
 class Snake():
 #This class contains the variables associated with a snake
 
-    length = 1
+    length = 0
 
     #start the snake in the middle of the grid
     x_coord = COLS // 2
     y_coord = ROWS // 2
+
+    coords = [(x_coord,y_coord)]
 
     #initialize the corresponding grid value
     def __init__(self, grid):
@@ -72,14 +74,17 @@ def green_square(grid):
     #get random coordinates
     randx = random.randint(0,COLS-1)
     randy = random.randint(0,ROWS-1)
+    #repeat until the grid space is not part of the snake
+    while grid[randy][randx] == SNAKE_BLOCK:
+        randx = random.randint(0,COLS-1)
+        randy = random.randint(0,ROWS-1)
 
     #draw green rectangle at the random coordinates
     pygame.draw.rect(board, GREEN, (randx*BLOCK_W+MARGIN,randy*BLOCK_H+MARGIN,BLOCK_W-MARGIN,BLOCK_H-MARGIN))
 
     #set grid value to green
-    grid[randx][randy] = GREEN_BLOCK
+    grid[randy][randx] = GREEN_BLOCK
 
-    grid[randx][randy] = GREEN_BLOCK
 
 #Running the game
 def main():
@@ -98,6 +103,7 @@ def main():
     #clear grid values(set all to zero)
     clear_grid(grid_vals)
 
+    #initial green square
     green_square(grid_vals)
 
     #create the snake character
@@ -129,6 +135,20 @@ def main():
             #s.x_coord += 1
         
         #clear board at previous coordinates
+        #deal with edge cases. Pacman effect(continued on line 175)
+        if s.y_coord == ROWS-1 and s.direction == UP:
+            grid_vals[0][s.x_coord] = WHITE_BLOCK
+            pygame.draw.rect(board, WHITE, (s.x_coord*BLOCK_W+MARGIN,0*BLOCK_H+MARGIN,BLOCK_W-MARGIN,BLOCK_H-MARGIN))
+        elif s.y_coord == 0 and s.direction == DOWN:
+            grid_vals[ROWS-1][s.x_coord] = WHITE_BLOCK
+            pygame.draw.rect(board, WHITE, (s.x_coord*BLOCK_W+MARGIN,(ROWS-1)*BLOCK_H+MARGIN,BLOCK_W-MARGIN,BLOCK_H-MARGIN))
+        elif s.x_coord == ROWS and s.direction == LEFT:
+            grid_vals[s.y_coord][0] = WHITE_BLOCK
+            pygame.draw.rect(board, WHITE, (0*BLOCK_W+MARGIN,s.y_coord*BLOCK_H+MARGIN,BLOCK_W-MARGIN,BLOCK_H-MARGIN))
+        elif s.x_coord == 0 and s.direction == RIGHT:
+            grid_vals[s.y_coord][ROWS-1] = WHITE_BLOCK
+            pygame.draw.rect(board, WHITE, ((ROWS-1)*BLOCK_W+MARGIN,s.y_coord*BLOCK_H+MARGIN,BLOCK_W-MARGIN,BLOCK_H-MARGIN))
+        
         grid_vals[s.y_coord][s.x_coord] = WHITE_BLOCK
         pygame.draw.rect(board, WHITE, (s.x_coord*BLOCK_W+MARGIN,s.y_coord*BLOCK_H+MARGIN,BLOCK_W-MARGIN,BLOCK_H-MARGIN))
 
@@ -142,9 +162,27 @@ def main():
         else:
             s.x_coord += 1
 
-        #move snake block 
+        #move snake block
+        #deal with edge cases. Pacman effect
+        if s.y_coord == ROWS:
+            s.y_coord = 0
+        elif s.y_coord == -1:
+            s.y_coord = ROWS - 1
+        if s.x_coord == ROWS:
+            s.x_coord = 0
+        elif s.x_coord == -1:
+            s.x_coord = ROWS - 1
+
+        #check for green square and add to length if the snake found green square. Also generate
+        #a new green square
+        if grid_vals[s.y_coord][s.x_coord] == GREEN_BLOCK:
+            s.length += 1
+            s.coords.append(())
+            green_square(grid_vals)
+
         pygame.draw.rect(board, RED, (s.x_coord*BLOCK_W+MARGIN,s.y_coord*BLOCK_H+MARGIN,BLOCK_W-MARGIN,BLOCK_H-MARGIN))
         grid_vals[s.y_coord][s.x_coord] = SNAKE_BLOCK
+
 
         pygame.display.update()
 
