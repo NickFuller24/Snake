@@ -31,6 +31,8 @@ pygame.display.set_caption("Snake")
 icon = pygame.image.load("snake.png")
 pygame.display.set_icon(icon)
 
+#will be used to diplay game over message
+
 #Snake class
 class Snake():
 #This class contains the variables associated with a snake
@@ -41,7 +43,8 @@ class Snake():
     x_coord = COLS // 2
     y_coord = ROWS // 2
 
-    coords = [(x_coord,y_coord)]
+    #(row = y, column = x)
+    coords = [[y_coord,x_coord]]
 
     #initialize the corresponding grid value
     def __init__(self, grid):
@@ -57,9 +60,6 @@ def draw_board():
         pygame.draw.line(board, BLACK, (0,row*BLOCK_H), (WIN_W-1,row*BLOCK_H))
         #vertical line for each column
         pygame.draw.line(board, BLACK, (row*BLOCK_H,0), (row*BLOCK_H, WIN_H-1), MARGIN)
-        #for col in range(COLS):
-            #vertical line for each column
-            #pygame.draw.line(board, BLACK, (col*BLOCK_W,0), (col*BLOCK_W,WIN_H-1), MARGIN)
 
 #populate grid with all zeros
 def clear_grid(grid):
@@ -70,6 +70,7 @@ def clear_grid(grid):
             grid[row].append([])
             grid[row][col] = WHITE_BLOCK
 
+#draw a random green square and set corresponding grid value
 def green_square(grid):
     #get random coordinates
     randx = random.randint(0,COLS-1)
@@ -84,7 +85,6 @@ def green_square(grid):
 
     #set grid value to green
     grid[randy][randx] = GREEN_BLOCK
-
 
 #Running the game
 def main():
@@ -134,23 +134,25 @@ def main():
             s.direction = RIGHT
             #s.x_coord += 1
         
-        #clear board at previous coordinates
+        #clear board
         #deal with edge cases. Pacman effect(continued on line 175)
-        if s.y_coord == ROWS-1 and s.direction == UP:
-            grid_vals[0][s.x_coord] = WHITE_BLOCK
-            pygame.draw.rect(board, WHITE, (s.x_coord*BLOCK_W+MARGIN,0*BLOCK_H+MARGIN,BLOCK_W-MARGIN,BLOCK_H-MARGIN))
-        elif s.y_coord == 0 and s.direction == DOWN:
-            grid_vals[ROWS-1][s.x_coord] = WHITE_BLOCK
-            pygame.draw.rect(board, WHITE, (s.x_coord*BLOCK_W+MARGIN,(ROWS-1)*BLOCK_H+MARGIN,BLOCK_W-MARGIN,BLOCK_H-MARGIN))
-        elif s.x_coord == ROWS and s.direction == LEFT:
-            grid_vals[s.y_coord][0] = WHITE_BLOCK
-            pygame.draw.rect(board, WHITE, (0*BLOCK_W+MARGIN,s.y_coord*BLOCK_H+MARGIN,BLOCK_W-MARGIN,BLOCK_H-MARGIN))
-        elif s.x_coord == 0 and s.direction == RIGHT:
-            grid_vals[s.y_coord][ROWS-1] = WHITE_BLOCK
-            pygame.draw.rect(board, WHITE, ((ROWS-1)*BLOCK_W+MARGIN,s.y_coord*BLOCK_H+MARGIN,BLOCK_W-MARGIN,BLOCK_H-MARGIN))
+        for num in range(0,s.length + 1):
+            if s.coords[num][0] == ROWS-1 and s.direction == UP:
+                grid_vals[0][s.coords[num][1]] = WHITE_BLOCK
+                pygame.draw.rect(board, WHITE, (s.coords[num][1]*BLOCK_W+MARGIN,0*BLOCK_H+MARGIN,BLOCK_W-MARGIN,BLOCK_H-MARGIN))
+            elif s.coords[num][0] == 0 and s.direction == DOWN:
+                grid_vals[ROWS-1][s.coords[num][1]] = WHITE_BLOCK
+                pygame.draw.rect(board, WHITE, (s.coords[num][1]*BLOCK_W+MARGIN,(ROWS-1)*BLOCK_H+MARGIN,BLOCK_W-MARGIN,BLOCK_H-MARGIN))
+            elif s.coords[num][1] == ROWS and s.direction == LEFT:
+                grid_vals[s.coords[num][0]][0] = WHITE_BLOCK
+                pygame.draw.rect(board, WHITE, (0*BLOCK_W+MARGIN,s.coords[num][0]*BLOCK_H+MARGIN,BLOCK_W-MARGIN,BLOCK_H-MARGIN))
+            elif s.coords[num][1] == 0 and s.direction == RIGHT:
+                grid_vals[s.coords[num][0]][ROWS-1] = WHITE_BLOCK
+                pygame.draw.rect(board, WHITE, ((ROWS-1)*BLOCK_W+MARGIN,s.coords[num][0]*BLOCK_H+MARGIN,BLOCK_W-MARGIN,BLOCK_H-MARGIN))
         
-        grid_vals[s.y_coord][s.x_coord] = WHITE_BLOCK
-        pygame.draw.rect(board, WHITE, (s.x_coord*BLOCK_W+MARGIN,s.y_coord*BLOCK_H+MARGIN,BLOCK_W-MARGIN,BLOCK_H-MARGIN))
+            #clear board at previous coordinates
+            grid_vals[s.coords[num][0]][s.coords[num][1]] = WHITE_BLOCK
+            pygame.draw.rect(board, WHITE, (s.coords[num][1]*BLOCK_W+MARGIN,s.coords[num][0]*BLOCK_H+MARGIN,BLOCK_W-MARGIN,BLOCK_H-MARGIN))
 
         #Change coordinates
         if s.direction == UP:
@@ -177,12 +179,27 @@ def main():
         #a new green square
         if grid_vals[s.y_coord][s.x_coord] == GREEN_BLOCK:
             s.length += 1
-            s.coords.append(())
+            s.coords.append([])
             green_square(grid_vals)
+        
+        #body blocks
+        if s.length > 0:
+            for num in range(s.length,0,-1):
+                #This saves the previous coordinates(since the body blocks tail the head)
+                s.coords[num] = s.coords[num-1]
 
-        pygame.draw.rect(board, RED, (s.x_coord*BLOCK_W+MARGIN,s.y_coord*BLOCK_H+MARGIN,BLOCK_W-MARGIN,BLOCK_H-MARGIN))
+                #draw the block and set the corresponding grid value (row = y,column = x)
+                grid_vals[s.coords[num][0]][s.coords[num][1]] = SNAKE_BLOCK
+                pygame.draw.rect(board, RED, (s.coords[num][1]*BLOCK_W+MARGIN,s.coords[num][0]*BLOCK_H+MARGIN,BLOCK_W-MARGIN,BLOCK_H-MARGIN))
+        
+        #if snake ran into itself
+        if grid_vals[s.y_coord][s.x_coord] == SNAKE_BLOCK:
+            run = False
+
+        #head block
+        s.coords[0] = [s.y_coord,s.x_coord]
         grid_vals[s.y_coord][s.x_coord] = SNAKE_BLOCK
-
+        pygame.draw.rect(board, RED, (s.x_coord*BLOCK_W+MARGIN,s.y_coord*BLOCK_H+MARGIN,BLOCK_W-MARGIN,BLOCK_H-MARGIN))
 
         pygame.display.update()
 
