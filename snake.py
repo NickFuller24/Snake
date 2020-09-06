@@ -44,7 +44,7 @@ class Snake():
     #initialize the corresponding grid value
     def __init__(self, grid):
         grid[ROWS // 2][COLS // 2] = SNAKE_BLOCK
-        pygame.draw.rect(board, RED, (self.x_coord*BLOCK_W,self.y_coord*BLOCK_H,BLOCK_W,BLOCK_H))
+        pygame.draw.rect(board, RED, (self.x_coord*BLOCK_W+MARGIN,self.y_coord*BLOCK_H+MARGIN,BLOCK_W-MARGIN,BLOCK_H-MARGIN))
 
     direction = RIGHT
 
@@ -74,7 +74,7 @@ def green_square(grid):
     randy = random.randint(0,ROWS-1)
 
     #draw green rectangle at the random coordinates
-    pygame.draw.rect(board, GREEN, (randx*BLOCK_W,randy*BLOCK_H,BLOCK_W,BLOCK_H))
+    pygame.draw.rect(board, GREEN, (randx*BLOCK_W+MARGIN,randy*BLOCK_H+MARGIN,BLOCK_W-MARGIN,BLOCK_H-MARGIN))
 
     #set grid value to green
     grid[randx][randy] = GREEN_BLOCK
@@ -105,7 +105,7 @@ def main():
     
     run = True
     while run:
-        pygame.time.delay(60)
+        pygame.time.delay(80)
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -117,18 +117,35 @@ def main():
         #determine direction that the snake should move
         if keys[pygame.K_UP]:
             s.direction = UP
-            s.y_coord -= 1                  #rows count top to bottom
+            #s.y_coord -= 1                  #rows count top to bottom
         if keys[pygame.K_DOWN]:
             s.direction = DOWN
-            s.y_coord += 1
+            #s.y_coord += 1
         if keys[pygame.K_LEFT]:
             s.direction = LEFT
-            s.x_coord -= 1
+            #s.x_coord -= 1
         if keys[pygame.K_RIGHT]:
             s.direction = RIGHT
-            s.x_coord += 1
+            #s.x_coord += 1
         
-        pygame.draw.rect(board, RED, (s.x_coord*BLOCK_W,s.y_coord*BLOCK_H,BLOCK_W,BLOCK_H))
+        #clear board at previous coordinates
+        grid_vals[s.y_coord][s.x_coord] = WHITE_BLOCK
+        pygame.draw.rect(board, WHITE, (s.x_coord*BLOCK_W+MARGIN,s.y_coord*BLOCK_H+MARGIN,BLOCK_W-MARGIN,BLOCK_H-MARGIN))
+
+        #Change coordinates
+        if s.direction == UP:
+            s.y_coord -= 1
+        elif s.direction == DOWN:
+            s.y_coord += 1
+        elif s.direction == LEFT:
+            s.x_coord -= 1
+        else:
+            s.x_coord += 1
+
+        #move snake block 
+        pygame.draw.rect(board, RED, (s.x_coord*BLOCK_W+MARGIN,s.y_coord*BLOCK_H+MARGIN,BLOCK_W-MARGIN,BLOCK_H-MARGIN))
+        grid_vals[s.y_coord][s.x_coord] = SNAKE_BLOCK
+
         pygame.display.update()
 
 main()
