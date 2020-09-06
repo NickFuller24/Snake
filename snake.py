@@ -31,8 +31,6 @@ pygame.display.set_caption("Snake")
 icon = pygame.image.load("snake.png")
 pygame.display.set_icon(icon)
 
-#will be used to diplay game over message
-
 #Snake class
 class Snake():
 #This class contains the variables associated with a snake
@@ -123,16 +121,12 @@ def main():
         #determine direction that the snake should move
         if keys[pygame.K_UP]:
             s.direction = UP
-            #s.y_coord -= 1                  #rows count top to bottom
         if keys[pygame.K_DOWN]:
             s.direction = DOWN
-            #s.y_coord += 1
         if keys[pygame.K_LEFT]:
             s.direction = LEFT
-            #s.x_coord -= 1
         if keys[pygame.K_RIGHT]:
             s.direction = RIGHT
-            #s.x_coord += 1
         
         #clear board
         #deal with edge cases. Pacman effect(continued on line 175)
